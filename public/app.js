@@ -39,7 +39,7 @@ function addCard(c) {
   const card = el("article", "card");
   const tags = el("div", "tags");
   for (const t of c.tags || []) tags.append(el("span", `tag ${t.includes("빠듯") ? "warn" : ""}`, t));
-  if (c.demo) tags.append(el("span", "tag warn", "샘플"));
+  if (c.demo) tags.append(el("span", "tag sample", "샘플"));
   if (tags.children.length) card.append(tags);
 
   const h = el("h3");
