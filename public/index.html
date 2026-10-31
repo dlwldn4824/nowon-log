@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>골목픽</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div>
+        <h1>골목픽</h1>
+        <p class="sub">광운대 상권 · 반경 500m</p>
+      </div>
+      <div class="top-right">
+        <span id="mode" class="badge">데모</span>
+        <button id="openSettings" class="icon" aria-label="API 키 설정" title="API 키 설정">⚙️</button>
+      </div>
+    </header>
+
+    <div id="banner" class="banner" hidden>
+      API 키가 없어서 <b>데모 모드</b>(샘플 데이터)로 동작 중이에요.
+      <button class="link" data-open-settings>키 넣기 →</button>
+    </div>
+
+    <section id="log" class="log" aria-live="polite">
+      <div class="msg bot">안녕하세요! 공강이 얼마나 남았나요? 혼자인지, 몇 명인지도 알려주세요.</div>
+    </section>
+
+    <div class="chips">
+      <button data-q="공강 1시간 남았어. 만 원 이하로 혼밥할 곳 있어?">1시간 혼밥</button>
+      <button data-q="공강 2시간인데 카공할 카페 추천해줘">2시간 카공</button>
+      <button data-q="다음 주 목요일 저녁 7시, 25명 개총할 곳 찾아줘">단체 회식</button>
+    </div>
+
+    <form id="form" class="composer">
+      <input id="input" autocomplete="off" placeholder="공강 시간, 인원, 예산을 말해 주세요" />
+      <button type="submit" aria-label="보내기">↑</button>
+    </form>
+  </main>
+
+  <!-- API 키 설정 -->
+  <dialog id="settings">
+    <form method="dialog" id="settingsForm">
+      <h2>API 키 설정</h2>
+      <p class="hint">키는 이 컴퓨터의 <code>.env</code> 파일에만 저장되고 GitHub에는 올라가지 않아요.</p>
+
+      <label>Claude API 키
+        <input name="ANTHROPIC_API_KEY" type="password" autocomplete="off" placeholder="sk-ant-..." />
+        <small id="anthropicNow"></small>
+      </label>
+      <label>HeyYumi 토큰
+        <input name="HEYYUMI_API_KEY" type="password" autocomplete="off" placeholder="HeyYumi 팀에서 받은 토큰" />
+        <small id="heyyumiNow"></small>
+      </label>
+      <details>
+        <summary>고급 설정</summary>
+        <label>Claude 모델 <input name="ANTHROPIC_MODEL" placeholder="claude-opus-5-5" /></label>
+        <label>HeyYumi MCP 주소 <input name="HEYYUMI_MCP_URL" placeholder="https://mcp.heyyumi.ai/mcp" /></label>
+      </details>
+      <p class="hint">빈 칸은 기존 값을 그대로 둬요.</p>
+      <div class="row">
+        <button type="button" id="clearKeys" class="ghost">키 모두 지우기</button>
+        <span class="spacer"></span>
+        <button type="button" id="closeSettings" class="ghost">닫기</button>
+        <button type="submit" id="saveSettings" class="primary">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 예약 요청 -->
+  <dialog id="reserve">
+    <form method="dialog" id="reserveForm">
+      <h2>예약 요청 — <span id="reservePlace"></span></h2>
+      <label>날짜·시간 <input name="time" type="datetime-local" required /></label>
+      <label>인원 <input name="count" type="number" min="1" value="1" required /></label>
+      <label>이름 <input name="name" autocomplete="name" /></label>
+      <label>연락처 <input name="phone" type="tel" placeholder="010-1234-5678" required /></label>
+      <label>요청사항 <input name="note" placeholder="예) 단체석, 개강총회" /></label>
+      <p class="hint" id="reserveHint">보내면 가게에 바로 알림이 가고, 5분 안에 수락 여부를 알려 드려요.</p>
+      <div class="row">
+        <span class="spacer"></span>
+        <button type="button" id="closeReserve" class="ghost">취소</button>
+        <button type="submit" class="primary">예약 요청 보내기</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
