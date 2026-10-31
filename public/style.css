@@ -3,7 +3,6 @@
   --brand-deep: #f0542a;
   --brand-soft: #fff1eb;
   --brand-tint: #ffd9cc;
-  --bg: #ff6b3d;
   --surface: #ffffff;
   --gray-50: #f7f7f8;
   --line: #eeeeef;
@@ -17,36 +16,10 @@
 body { margin: 0; background: var(--surface); color: var(--ink); }
 button { font: inherit; }
 
-/* ── 바깥 무대 (데스크톱: 주황 배경 + 소개 + 폰) ── */
-.stage { min-height: 100dvh; }
-.intro { display: none; }
-
-@media (min-width: 900px) {
-  body { background: var(--bg); overflow: hidden; }
-  .stage {
-    position: relative; height: 100dvh; display: grid;
-    grid-template-columns: minmax(320px, 1fr) auto; align-items: center;
-    gap: 64px; padding: 0 8vw; color: #fff;
-  }
-  /* 레퍼런스처럼 큰 반투명 원 */
-  .stage::before {
-    content: ""; position: absolute; right: -10vw; top: 8vh;
-    width: 70vw; height: 70vw; border-radius: 50%;
-    background: rgb(255 255 255 / .16); pointer-events: none;
-  }
-  .intro { display: block; position: relative; max-width: 440px; }
-  .eyebrow { font-size: 13px; opacity: .85; margin: 0 0 40px; }
-  .intro-title { font-size: 44px; font-weight: 800; margin: 0 0 16px; }
-  .intro-desc { font-size: 15px; line-height: 1.7; opacity: .95; margin: 0 0 56px; }
-  .about { display: grid; grid-template-columns: 60px 1fr; gap: 10px 16px; font-size: 13px; margin: 0; }
-  .about dt { font-weight: 700; }
-  .about dd { margin: 0; opacity: .9; }
-  .phone {
-    position: relative; width: 390px; height: min(820px, calc(100dvh - 64px));
-    border-radius: 44px; border: 10px solid #fdf7f3;
-    box-shadow: 0 30px 80px rgb(120 40 10 / .35);
-    overflow: hidden;
-  }
+/* 넓은 화면에서는 앱 폭만큼 가운데 정렬 */
+@media (min-width: 520px) {
+  body { background: var(--gray-50); }
+  .phone { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
 }
 
 /* ── 앱 ── */
@@ -130,3 +103,17 @@ dialog code { background: var(--brand-soft); color: var(--brand-deep); padding: 
 .hint { font-size: 12px; color: var(--muted); margin: 10px 0 0; }
 .row { display: flex; gap: 8px; margin-top: 18px; }
 .spacer { flex: 1; }
+
+/* 좁은 화면에서도 깨지지 않게 */
+body { word-break: keep-all; overflow-wrap: anywhere; }
+.composer input { min-width: 0; }
+.composer button { flex: none; height: 46px; }
+.actions button { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 340px) {
+  .log { padding: 6px 12px 16px; }
+  .top { padding: 14px 12px 8px; }
+  .hero { padding: 18px 16px 14px; }
+  .hero-title { font-size: 17px; }
+  .actions { flex-direction: column; }
+  .actions button + button::before { display: none; }
+}
