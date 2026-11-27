@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import './App.css'
 import Icon from './Icon.jsx'
+import { StatusBar } from './ui.jsx'
+import Owner from './Owner.jsx'
 import { PLACES, byId, BUILDINGS, gateOf, tripOf, SOLO_ORDER, SOLO_KEYWORDS, GROUP_KEYWORDS, ROUTES, INITIAL_RESERVATIONS, STATE_LABEL } from './data.js'
 
 const VOTE_LINK = 'https://eodigage.app/vote/kw1119' // 시연용 가짜 링크
@@ -10,15 +12,9 @@ const addMin = (hhmm, m) => { const [h, mm] = hhmm.split(':').map(Number); const
 const fmtDate = iso => { const d = new Date(iso + 'T00:00'); return `${d.getMonth() + 1}월 ${d.getDate()}일 (${'일월화수목금토'[d.getDay()]})` }
 const fmtTime = hm => { const [h, m] = hm.split(':').map(Number); return `${h < 12 ? '오전' : '오후'} ${h % 12 || 12}:${String(m).padStart(2, '0')}` }
 
-function StatusBar({ light }) {
-  return <div className={'statusbar' + (light ? ' light' : '')}><b>9:41</b><span className="sb-icons">
-    <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" /><rect x="5" y="5.5" width="3" height="6.5" rx="1" /><rect x="10" y="3" width="3" height="9" rx="1" /><rect x="15" y="0" width="3" height="12" rx="1" /></svg>
-    <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3A10.4 10.4 0 0 0 8 .4 10.4 10.4 0 0 0 .8 3.3L2 4.6a8.6 8.6 0 0 1 6-2.4Zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.2-1.3A6.7 6.7 0 0 0 8 4a6.7 6.7 0 0 0-4.6 1.8l1.2 1.3c.9-.8 2.1-1.3 3.4-1.3Zm0 3.6c-.5 0-1 .2-1.3.5L8 11.6l1.3-1.7c-.3-.3-.8-.5-1.3-.5Z" /></svg>
-    <svg width="26" height="12" viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".45" /><rect x="2.5" y="2.5" width="18" height="7" rx="1.5" /><rect x="23.6" y="4" width="1.6" height="4" rx=".8" opacity=".45" /></svg>
-  </span></div>
-}
-
 export default function App() {
+  const [app, setApp] = useState(() => window.location.hash === '#owner' ? 'owner' : 'student')
+  const [ownerLive, setOwnerLive] = useState({})
   const [page, setPage] = useState('home')
   const [history, setHistory] = useState([])
   const [mode, setMode] = useState('solo')
@@ -48,7 +44,10 @@ export default function App() {
   const [prefs, setPrefs] = useState({ cats: ['한식', '일식', '카페'], budget: '1만 원 이하', alarm: true, news: false })
   const [toast, setToast] = useState('')
 
-  const place = byId(selectedId) || PLACES[0]
+  // 사장님 앱에서 바꾼 영업 상태를 영축산 정육식당(id 9)에 반영
+  const live = p => p.id === 9 && ownerLive.status ? { ...p, status: ownerLive.status, hours: ownerLive.hours || p.hours } : p
+  const switchApp = next => { setApp(next); window.history.replaceState(null, '', next === 'owner' ? '#owner' : '#'); window.scrollTo(0, 0) }
+  const place = live(byId(selectedId) || PLACES[0])
   const res = reservations.find(r => r.id === currentRes) || reservations[0]
   const trip = p => tripOf(p, fromB, toB)
   const feasible = SOLO_ORDER.map(byId).filter(p => trip(p) <= minutes)
@@ -195,7 +194,7 @@ export default function App() {
           <em className="ai-note">AI 생성 샘플 이미지</em>
         </div>
         <div className="detail-body">
-          <div className="info-row"><Icon n="clock" s={18} className="muted" /><span>{place.hours}</span><em className={'pill ' + (place.status === '곧 마감' ? 'rejected' : 'confirmed')}>{place.status}</em></div>
+          <div className="info-row"><Icon n="clock" s={18} className="muted" /><span>{place.hours}</span><em className={'pill ' + (place.status === '영업 중' ? 'confirmed' : 'rejected')}>{place.status}</em></div>
           <div className="check-tags">{(place.checks || (place.group ? [`단체석 ${place.max}석`, '예약 가능', '회식 가능'] : ['혼밥 가능', '빠른 회전', '예약 가능'])).map(x => <span key={x}>✓ {x}</span>)}</div>
           <div className="eta">
             <div className="eta-head"><b><Icon n="clock" s={16} sw={2.4} className="orange" />공강시간 계산</b><em className={'pill ' + (left >= 0 ? 'confirmed' : 'rejected')}>{left >= 0 ? `${left}분 여유` : `${-left}분 부족`}</em></div>
@@ -251,7 +250,7 @@ export default function App() {
     </> },
 
     // ================= 06 지도 =================
-    map: () => { const sel = byId(mapSel); const pins = [{ id: 8, x: 10, y: 33, chosen: '갈 곳', sub: '오늘 공강에 가기로 함' }, { id: 9, x: 47, y: 52, chosen: '예약', sub: '11/13 19:00 · 25명' }, { id: 7, x: 70, y: 28 }, { id: 4, x: 61, y: 36 }, { id: 5, x: 12, y: 52 }, { id: 1, x: 62, y: 22, closed: true }]; return <>
+    map: () => { const sel = live(byId(mapSel)); const pins = [{ id: 8, x: 10, y: 33, chosen: '갈 곳', sub: '오늘 공강에 가기로 함' }, { id: 9, x: 47, y: 52, chosen: '예약', sub: '11/13 19:00 · 25명' }, { id: 7, x: 70, y: 28 }, { id: 4, x: 61, y: 36 }, { id: 5, x: 12, y: 52 }, { id: 1, x: 62, y: 22, closed: true }]; return <>
       <main className="map-screen">
         <div className="map-bg"><span className="blk" style={{ left: '8%', top: '18%', width: '18%', height: '9%' }} /><span className="blk" style={{ left: '41%', top: '18%', width: '20%', height: '13%' }} /><span className="blk park" style={{ left: '74%', top: '18%', width: '20%', height: '7%' }} /><span className="blk" style={{ left: '8%', top: '35%', width: '25%', height: '22%' }} /><span className="blk" style={{ left: '41%', top: '35%', width: '20%', height: '22%' }} /><span className="blk" style={{ left: '70%', top: '35%', width: '14%', height: '22%' }} /><span className="road-h" style={{ top: '14%' }} /><span className="road-h" style={{ top: '30%' }} /><span className="road-h" style={{ top: '62%' }} /><span className="road-v" style={{ left: '31%' }} /><span className="road-v" style={{ left: '65%' }} /><span className="road-v thin" style={{ left: '86%' }} /></div>
         <StatusBar />
@@ -307,7 +306,7 @@ export default function App() {
           <div className="sec-head"><h2>내가 쓴 리뷰</h2><button>2개 ›</button></div>
           {[['청춘 김밥', '11월 4일', '공강 30분에도 여유 있게 먹고 왔어요. 김밥 회전이 빨라요!'], ['광운 돌솥식당', '10월 29일', '돌솥비빔밥 든든해요. 혼밥 자리도 넉넉해요.']].map(([n, d, t]) => <div className="review" key={n}><div><b>{n}</b><span className="stars">{[0, 1, 2, 3, 4].map(i => <Icon key={i} n="star" s={13} fill="currentColor" sw={0} />)}</span><small>{d}</small></div><p>{t}</p></div>)}
         </div>
-        <div className="card menu-rows">{[['예약 내역', 'reservations'], ['찜한 가게', 'favorites'], ['방문 기록', 'visits'], ['내가 쓴 리뷰', null], ['채팅 기록', 'chat'], ['선호 음식 및 예산 설정', 'visits'], ['알림 설정', 'visits']].map(([l, to]) => <button key={l} onClick={() => to && (to === 'chat' ? openChat() : go(to))}>{l}<Icon n="right" s={16} className="muted" /></button>)}</div>
+        <div className="card menu-rows">{[['예약 내역', 'reservations'], ['찜한 가게', 'favorites'], ['방문 기록', 'visits'], ['내가 쓴 리뷰', null], ['채팅 기록', 'chat'], ['선호 음식 및 예산 설정', 'visits'], ['알림 설정', 'visits'], ['사장님 앱으로 보기', 'owner']].map(([l, to]) => <button key={l} onClick={() => to && (to === 'owner' ? switchApp('owner') : to === 'chat' ? openChat() : go(to))}>{l}<Icon n="right" s={16} className="muted" /></button>)}</div>
       </main>
       <TabBar />
     </> },
@@ -389,7 +388,11 @@ export default function App() {
     date: { title: '언제 모이나요?', sub: '모임 날짜를 고르면 그날 예약 가능한 가게를 찾아요.' },
   }[sheet]
 
-  return <div className="web-back"><div className="phone">
+  return <div className="web-back">
+    <div className="app-switch" role="tablist" aria-label="앱 선택">{[['student', '학생 앱'], ['owner', '사장님 앱']].map(([k, l]) => <button key={k} role="tab" aria-selected={app === k} className={app === k ? 'on' : ''} onClick={() => switchApp(k)}>{l}</button>)}</div>
+    <div className="phone">
+    <div className="app-layer" hidden={app !== 'owner'}><Owner onLiveChange={setOwnerLive} onExit={() => switchApp('student')} /></div>
+    <div className="app-layer" hidden={app !== 'student'}>
     {screens[page]()}
     {sheet && <div className="sheet-dim" onClick={() => setSheet(null)}><div className="sheet" onClick={e => e.stopPropagation()}>
       <div className="sheet-handle" /><b>{sheetBody.title}</b><p className="sheet-sub">{sheetBody.sub}</p>
@@ -398,5 +401,6 @@ export default function App() {
       {sheet === 'date' && <div className="building-grid">{['2026-11-12', '2026-11-13', '2026-11-16', '2026-11-17', '2026-11-18', '2026-11-19'].map(d => <button key={d} className={bookDate === d ? 'on' : ''} onClick={() => { setBookDate(d); setSheet(null) }}><b>{fmtDate(d)}</b><small>저녁 7시 기준</small></button>)}</div>}
     </div></div>}
     {toast && <div className="toast">{toast}</div>}
+    </div>
   </div><p className="dev-note">어디가게 · 피그마 프로토타입 기반 구현 데모<br />가게 정보·예약·AI 추천은 시연용 샘플이며 실제 서비스와 연결되어 있지 않습니다.</p></div>
 }
