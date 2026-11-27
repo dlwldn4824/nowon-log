@@ -18,8 +18,9 @@ img { display: block; }
 .green { color: var(--green); }
 .red { color: var(--red); }
 
-.web-back { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 0; }
-.phone { width: 390px; max-width: 100%; height: 844px; max-height: calc(100vh - 80px); min-height: 640px; background: #fff; position: relative; overflow: hidden; display: flex; flex-direction: column; border-radius: 28px; box-shadow: 0 10px 40px #10121a22; }
+.web-back { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; align-items: center; background: #fff; }
+.phone { width: 100%; max-width: 480px; height: 100vh; height: 100dvh; background: #fff; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+@media (min-width: 481px) { .web-back { background: var(--g0); } .phone { box-shadow: 0 0 0 1px var(--line); } }
 .dev-note { margin: 14px 16px 0; font-size: 11px; line-height: 1.6; color: var(--mut); text-align: center; }
 @media (max-width: 480px) {
   .web-back { padding: 0; }
@@ -28,7 +29,7 @@ img { display: block; }
 }
 
 /* 상태바 · 헤더 · 탭바 */
-.statusbar { height: 47px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 4px 26px 0 32px; position: relative; z-index: 5; }
+.statusbar { height: max(env(safe-area-inset-top), 10px); flex: none; position: relative; z-index: 5; }
 .statusbar b { font-size: 16px; font-weight: 700; letter-spacing: -.2px; }
 .statusbar svg { fill: currentColor; }
 .sb-icons { display: flex; gap: 6px; align-items: center; }
@@ -39,7 +40,7 @@ img { display: block; }
 .round-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--beige); display: grid; place-items: center; color: var(--ink); }
 .top-header .round-btn { position: absolute; left: 20px; }
 .round-btn.white { background: #fff; box-shadow: 0 2px 8px #0002; }
-.tabbar { height: 84px; flex: none; display: flex; border-top: 1px solid var(--line); background: #fff; padding: 10px 0 22px; z-index: 6; }
+.tabbar { flex: none; display: flex; border-top: 1px solid var(--line); background: #fff; padding: 8px 0 max(env(safe-area-inset-bottom), 10px); z-index: 6; }
 .tabbar button { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--mut3); font-size: 11px; font-weight: 500; }
 .tabbar button.on { color: var(--or); font-weight: 700; }
 

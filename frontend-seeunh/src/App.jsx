@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Icon from './Icon.jsx'
 import { StatusBar } from './ui.jsx'
@@ -46,6 +46,7 @@ export default function App() {
 
   // 사장님 앱에서 바꾼 영업 상태를 영축산 정육식당(id 9)에 반영
   const live = p => p.id === 9 && ownerLive.status ? { ...p, status: ownerLive.status, hours: ownerLive.hours || p.hours } : p
+  useEffect(() => { const f = () => setApp(window.location.hash === '#owner' ? 'owner' : 'student'); window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f) }, [])
   const switchApp = next => { setApp(next); window.history.replaceState(null, '', next === 'owner' ? '#owner' : '#'); window.scrollTo(0, 0) }
   const place = live(byId(selectedId) || PLACES[0])
   const res = reservations.find(r => r.id === currentRes) || reservations[0]
@@ -389,7 +390,6 @@ export default function App() {
   }[sheet]
 
   return <div className="web-back">
-    <div className="app-switch" role="tablist" aria-label="앱 선택">{[['student', '학생 앱'], ['owner', '사장님 앱']].map(([k, l]) => <button key={k} role="tab" aria-selected={app === k} className={app === k ? 'on' : ''} onClick={() => switchApp(k)}>{l}</button>)}</div>
     <div className="phone">
     <div className="app-layer" hidden={app !== 'owner'}><Owner onLiveChange={setOwnerLive} onExit={() => switchApp('student')} /></div>
     <div className="app-layer" hidden={app !== 'student'}>
@@ -402,5 +402,5 @@ export default function App() {
     </div></div>}
     {toast && <div className="toast">{toast}</div>}
     </div>
-  </div><p className="dev-note">어디가게 · 피그마 프로토타입 기반 구현 데모<br />가게 정보·예약·AI 추천은 시연용 샘플이며 실제 서비스와 연결되어 있지 않습니다.</p></div>
+  </div></div>
 }
